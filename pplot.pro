@@ -8,7 +8,7 @@ TARGET = pplot
 INCLUDEPATH += ./
 
 # Input
-HEADERS += openglwindow.h
-SOURCES += main.cpp openglwindow.cpp
+HEADERS += openglwindow.h model.h
+SOURCES += main.cpp openglwindow.cpp model.cpp
 MOC_DIR = .moc/
 OBJECTS_DIR = .objects/

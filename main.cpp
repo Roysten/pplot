@@ -1,11 +1,17 @@
+//TODO Use VAO's to support multiple models at once
+
+#include <iostream>
+
 #include "openglwindow.h"
+#include "model.h"
 
 #include <QtGui/QGuiApplication>
 #include <QtGui/QMatrix4x4>
 #include <QtGui/QOpenGLShaderProgram>
+#include <QtGui/QOpenGLVertexArrayObject>
 #include <QtGui/QScreen>
-#include <iostream>
 
+#include <QVector>
 #include <QVector3D>
 
 #include <QtCore/qmath.h>
@@ -14,128 +20,32 @@ class ParamWindow : public OpenGLWindow
 {
 public:
     ParamWindow();
-	~ParamWindow();
 
     void initialize() Q_DECL_OVERRIDE;
     void render() Q_DECL_OVERRIDE;
 
 private:
-	void generatePoints(QVector3D* points);
-	void generateVertices(QVector3D* points);
-	void calculateNormals();
-
     GLuint m_posAttr;
     GLuint m_normAttr;
     GLuint m_matrixUniform;
 
-	QVector3D* vertices;
-	QVector3D* normals;
-
-	GLfloat xmin;
-	GLfloat xmax;
-	GLfloat ymin;
-	GLfloat ymax;
-	GLint xstep;
-	GLint ystep;
+	QVector<Model> models;
+	//QVector<QOpenGLVertexArrayObject> vaos;
 
     QOpenGLShaderProgram *m_program;
     int m_frame;
 };
 
-ParamWindow::~ParamWindow()
-{
-	delete[] normals;
-	delete[] vertices;
-}
-
 ParamWindow::ParamWindow()
-	: xmin(0)
-	, xmax(6.28)
-	, ymin(0)
-	, ymax(3.14)
-	, xstep(20)
-	, ystep(10)
-    , m_program(0)
+    : m_program(0)
     , m_frame(0)
 {
-	//Account for inclusive formulas used in maths
-	xstep +=1; 
-	ystep += 1;
+	models.append(Model());
 
-	normals = new QVector3D[xstep * ystep * 6];
-	vertices = new QVector3D[xstep * ystep * 6];
-	
-	QVector3D points[xstep * ystep];
-	generatePoints(points);
-	generateVertices(points);
-	calculateNormals();
-}
-
-void ParamWindow::generateVertices(QVector3D* points)
-{
-	for(int i = 0; i < xstep - 1; ++i)
+	/*for(QVector<Model>::iterator elem = models.begin(); elem != models.end(); ++elem)
 	{
-		for(int j = 0; j < ystep - 1; ++j)
-		{
-			GLint pstart = i * ystep + j;
-			GLint pstart2 = (i + 1) * ystep + j;
-			GLint vstart = i * ystep * 6 + (j * 6);
-
-			//Bottom triangle
-			vertices[vstart] = points[pstart];
-			vertices[vstart + 1] = points[pstart + 1];
-			vertices[vstart + 2] = points[pstart2];
-
-			//Top triangle
-			vertices[vstart + 5] = points[pstart2];
-			vertices[vstart + 4] = points[pstart2 + 1];
-			vertices[vstart + 3] = points[pstart + 1];
-		}
-	}
-}
-
-void ParamWindow::generatePoints(QVector3D* points)
-{
-	for(GLint i = 0; i < xstep; ++i)
-	{
-		GLfloat x = ((xmax - xmin) / (xstep - 1)) * i;
-		for(GLint j = 0; j < ystep; ++j)
-		{
-			GLfloat y = ((ymax - ymin) / (ystep - 1)) * j;
-			GLint index = i * ystep + j;
-
-			//Plane
-			//points[index] = QVector3D(x, y, 1 - x - y);
-			
-			//Cone
-			//points[index] = QVector3D(y * cos(x), y * sin(x), y);
-			
-			//Cylinder
-			points[index] = QVector3D(2 * cos(x), 2 * sin(x), 2 * y);
-
-			//Spheres
-			//points[index] = QVector3D(2 * sin(x) * cos(y), 2 * sin(x) * sin(y), 2 * cos(x));
-			//points[index] = QVector3D(2 * sin(y) * cos(x), 2 * sin(y) * sin(x), 2 * cos(y));
-		}
-	}
-}
-
-void ParamWindow::calculateNormals()
-{
-	for(int i = 0; i < xstep * ystep * 6; i += 3)
-	{
-		QVector3D u = vertices[i + 1] - vertices[i];
-		QVector3D v = vertices[i + 2] - vertices[i];
-
-		QVector3D normal = QVector3D(
-			u.y() * v.z() - u.z() * v.y(),
-			u.z() * v.x() - u.x() * v.z(),
-			u.x() * v.y() - u.y() * v.x());
-
-		normals[i] = normal;
-		normals[i + 1] = normal;
-		normals[i + 2] = normal;
-	}	
+		QOpenGLVertexArrayObject vao = new QOpenGLVertexArrayObject(this);
+	}*/
 }
 
 int main(int argc, char **argv)
@@ -179,13 +89,15 @@ void ParamWindow::render()
 
     m_program->setUniformValue(m_matrixUniform, matrix);
 
-    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, vertices);
-    glVertexAttribPointer(m_normAttr, 3, GL_FLOAT, GL_FALSE, 0, normals);
+	Model m = models.first();
+
+    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, m.getVertices()->data());
+    glVertexAttribPointer(m_normAttr, 3, GL_FLOAT, GL_FALSE, 0, m.getNormals()->data());
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    glDrawArrays(GL_TRIANGLES, 0, xstep * ystep * 6);
+    glDrawArrays(GL_TRIANGLES, 0, m.getVertices()->length());
 
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
