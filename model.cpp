@@ -1,13 +1,14 @@
 #include <QtCore/qmath.h>
+#include <cmath>
 #include "model.h"
 
 Model::Model()
 : xmin(0)
-, xmax(2)
+, xmax(M_PI * 2)
 , ymin(0)
-, ymax(2)
-, xstep(10)
-, ystep(10)
+, ymax(M_PI)
+, xstep(100)
+, ystep(100)
 {
 	//Account for inclusive formulas used in maths
 	xstep += 1; 
@@ -93,6 +94,7 @@ void Model::calculateNormals()
 			u.y() * v.z() - u.z() * v.y(),
 			u.z() * v.x() - u.x() * v.z(),
 			u.x() * v.y() - u.y() * v.x());
+		normal.normalize();
 
 		normals[i] = normal;
 		normals[i + 1] = normal;
