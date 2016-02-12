@@ -5,3 +5,4 @@ qmake
 make
 ./pplot
 ```
+![screenshot](http://i.imgur.com/EmSsebQ.png?1)
