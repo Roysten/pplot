@@ -74,11 +74,13 @@ void Model::generatePoints(Verts &points)
 			//points[index] = QVector3D(y * cos(x), y * sin(x), y);
 			
 			//Cylinder
-			points[index] = QVector3D(2 * cos(x), 2 * sin(x), 2 * y);
+			//points[index] = QVector3D(2 * cos(x), 2 * sin(x), 2 * y);
 
 			//Spheres
 			//points[index] = QVector3D(2 * sin(x) * cos(y), 2 * sin(x) * sin(y), 2 * cos(x));
 			//points[index] = QVector3D(2 * sin(y) * cos(x), 2 * sin(y) * sin(x), 2 * cos(y));
+			
+			points[index] = QVector3D(cos(x), sin(x)*cos(x), sin(y));
 		}
 	}
 }

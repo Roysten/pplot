@@ -3,6 +3,6 @@
 in vec3 normals;
 
 void main() {
-	gl_FragColor.rgb = normals + 0.6;
+	gl_FragColor.rgb = abs(normals);
 	gl_FragColor.a = 1.0;
 }

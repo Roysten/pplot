@@ -77,7 +77,6 @@ void OpenGLWindow::renderNow()
 
     bool needsInitialize = false;
 
-
     if (!m_context) {
 		QSurfaceFormat format;
 		format.setRenderableType(QSurfaceFormat::OpenGL);
